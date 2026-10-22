@@ -1,0 +1,27 @@
+{
+  "id": "./",
+  "name": "LET IT FLOAT — 감정 정원",
+  "short_name": "LET IT FLOAT",
+  "description": "좋은 순간은 간직하고, 무거운 마음은 놓아주는 작은 감정 정원",
+  "lang": "ko-KR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F7F2",
+  "theme_color": "#F7F7F2",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -3,7 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#39d45c" />
+<meta name="theme-color" content="#F7F7F2" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="LET IT FLOAT" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" href="./icon-192.png" />
 <title>LET IT FLOAT — 감정 정원</title>
 <style>
   :root {
@@ -145,7 +150,7 @@
     <h2 id="archiveTitle">기억 보관함</h2>
     <p>가져온 기억은 달이 바뀌어도 이곳에서 다시 볼 수 있어요.</p>
     <div class="archive-list" id="archiveList"></div>
-    <div class="modal-actions"><button class="cancel" id="closeArchive">닫기</button><button class="save" id="exportBtn">기록 백업 ↗</button></div>
+    <div class="modal-actions"><button class="cancel" id="closeArchive">닫기</button></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -317,15 +322,15 @@
   document.getElementById("archiveBtn").addEventListener("click", openArchive);
   document.getElementById("closeArchive").addEventListener("click", () => archiveModal.classList.remove("open"));
   archiveModal.addEventListener("click", e => { if (e.target === archiveModal) archiveModal.classList.remove("open"); });
-  document.getElementById("exportBtn").addEventListener("click", () => {
-    const blob = new Blob([JSON.stringify(memories, null, 2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href=url; a.download="let-it-float-memories.json"; a.click();
-    URL.revokeObjectURL(url);
-    showToast("기록 백업 파일을 만들었어요.");
-  });
+
   entryText.addEventListener("keydown", e => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") addMemory(); });
   render();
+  // Installable PWA support; only registers when served over HTTPS or localhost.
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
 })();
 </script>
 </body>
