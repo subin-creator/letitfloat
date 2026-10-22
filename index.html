@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#39d45c" />
+<title>LET IT FLOAT — 감정 정원</title>
+<style>
+  :root {
+    --green: #E7EFE7;
+    --pink: #F6E5E5;
+    --black: #252A27;
+    --cream: #F7F7F2;
+    --paper: rgba(255,255,253,.96);
+    --sage-deep: #C5D9C7;
+    --rose: #E9B8B7;
+    --muted: #858B86;
+    --line: rgba(37,42,39,.09);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #F5F5F0; color: var(--black); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -.01em; overflow-x: hidden; -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, textarea { font: inherit; }
+  button { cursor: pointer; color: inherit; }
+  .app {
+    min-height: 100svh; max-width: 520px; margin: 0 auto; position: relative;
+    display: flex; flex-direction: column; padding: max(22px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom));
+    overflow: hidden; background: #F7F7F2;
+  }
+  .topline { display:flex; justify-content:space-between; gap:10px; align-items:center; font-size:10px; font-weight:600; letter-spacing:.07em; color:#858B85; }
+  .label { background:transparent; padding:0; }
+  h1 { font-size:clamp(32px, 8.5vw, 41px); line-height:1.12; letter-spacing:.015em; margin:32px 0 11px; font-weight:650; max-width:420px; }
+  .sub { font-size:13px; color:#858B85; max-width:300px; line-height:1.55; margin:0 0 23px; font-weight:400; letter-spacing:.005em; }
+  .stage {
+    position:relative; flex:1; min-height:390px; height:min(55svh, 590px); margin:0 0 18px;
+    border:1px solid rgba(65,88,68,.055); border-radius:32px;
+    background:radial-gradient(ellipse at 20% 10%, rgba(255,255,255,.58), transparent 42%),
+               linear-gradient(155deg,#EAF2E9 0%,#DCE8DC 100%);
+    overflow:hidden; isolation:isolate; box-shadow:0 8px 26px rgba(53,76,57,.045), inset 0 1px 0 rgba(255,255,255,.78);
+  }
+  .stage:before {
+    content:""; position:absolute; width:240px; height:210px; left:-85px; bottom:-105px;
+    background:rgba(255,255,255,.22); border-radius:50%; pointer-events:none;
+  }
+  .stage:after {
+    content:""; position:absolute; width:180px; height:180px; right:-78px; top:-85px;
+    background:rgba(255,255,255,.28); border-radius:50%; pointer-events:none;
+  }
+  .stage-note { position:absolute; left:19px; top:18px; z-index:0; font-size:9px; letter-spacing:.105em; color:#849286; font-weight:650; text-transform:uppercase; }
+  .bubble {
+    position:absolute; z-index:1; border:1px solid rgba(80,100,83,.10); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:10px; overflow:hidden; box-shadow:0 10px 28px rgba(70,92,73,.10), inset 0 1px 1px rgba(255,255,255,.95);
+    animation: floaty var(--duration, 5s) ease-in-out infinite alternate;
+    touch-action: manipulation; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    transition: box-shadow .25s ease, border-color .25s ease;
+  }
+  .bubble.good { background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.98),rgba(255,255,251,.80) 68%,rgba(215,230,215,.68)); }
+  .bubble.bad { background:radial-gradient(circle at 30% 22%,rgba(255,250,249,.96),rgba(249,231,230,.94) 68%,rgba(230,190,190,.74)); border-color:rgba(176,120,120,.13); }
+  .bubble .bubble-text { position:relative; z-index:1; font-size:11px; font-weight:550; line-height:1.25; max-height:100%; overflow:hidden; overflow-wrap:anywhere; color:#424943; text-shadow:0 1px 0 rgba(255,255,255,.4); }
+  .bubble:active { filter:brightness(1.015); box-shadow:0 7px 18px rgba(70,92,73,.10), inset 0 2px 3px rgba(255,255,255,.98); }
+  .bubble .tiny-date { position:absolute; bottom:5px; font-size:8px; font-weight:650; opacity:.65; }
+  @keyframes floaty {
+    0% { transform:translate3d(0,0,0) rotate(-1.5deg) scale(1); }
+    50% { transform:translate3d(calc(var(--drift, 8px) * .45),-7px,0) rotate(0deg) scale(1.012); }
+    100% { transform:translate3d(var(--drift, 8px),-14px,0) rotate(1.5deg) scale(1); }
+  }
+  .controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 0 21px; }
+  .action { border:1px solid rgba(37,42,39,.045); border-radius:16px; min-height:54px; font-weight:600; font-size:13px; text-align:center; padding:13px 10px; box-shadow:0 2px 8px rgba(34,44,35,.025), inset 0 1px 0 rgba(255,255,255,.6); transition:transform .15s, background .15s; letter-spacing:-.04em; }
+  .action:active { transform:scale(.985); }
+  .action.good-btn { background:#D9E6D8; }
+  .action.bad-btn { background:#F2DEDD; }
+  .bottom { display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:10px; font-weight:550; color:#858B86; }
+  .month { font-size:16px; letter-spacing:.005em; color:var(--black); font-weight:650; margin-bottom:4px; }
+  .archive-btn { background:rgba(255,255,255,.55); border:1px solid #E4E5DE; border-radius:999px; padding:10px 14px; font-size:11px; font-weight:550; }
+  .modal-backdrop { position:fixed; inset:0; background:rgba(35,43,37,.24); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px); display:none; align-items:flex-end; justify-content:center; z-index:10; padding:12px; }
+  .modal-backdrop.open { display:flex; }
+  .modal { width:min(100%,480px); background:var(--paper); border:1px solid rgba(52,62,53,.08); border-radius:26px; box-shadow:0 14px 42px rgba(35,45,38,.13); padding:23px; }
+  .modal h2 { font-size:24px; line-height:1.12; letter-spacing:-.025em; margin:0 0 9px; font-weight:650; }
+  .modal p { font-size:13px; line-height:1.5; color:#777E78; margin:0 0 17px; }
+  textarea { width:100%; min-height:105px; resize:vertical; border:1px solid #E2E5DE; background:#FBFCF9; padding:14px; outline:none; border-radius:15px; color:var(--black); font-size:14px; }
+  textarea:focus { border-color:#B8CEBA; box-shadow:0 0 0 3px rgba(184,206,186,.22); }
+  .modal-actions { display:flex; gap:8px; margin-top:12px; }
+  .modal-actions button { flex:1; border:0; border-radius:14px; padding:14px; font-weight:650; font-size:13px; }
+  .save { background:#D5E4D5; }
+  .cancel { background:#F0F1EC; }
+  .archive-list { max-height:45vh; overflow:auto; display:flex; flex-wrap:wrap; gap:7px; margin:12px 0; }
+  .archive-chip { background:#F8E9E7; border:1px solid rgba(52,52,60,.045); border-radius:14px; padding:10px 12px; font-size:12px; max-width:100%; overflow-wrap:anywhere; }
+  .archive-chip small { display:block; color:#858B86; margin-top:5px; }
+  .empty { font-size:13px; padding:18px 0; color:#777E78; line-height:1.5; }
+  .toast { position:fixed; z-index:20; left:50%; bottom:24px; transform:translateX(-50%); background:rgba(37,42,39,.94); color:white; border-radius:999px; padding:12px 17px; font-size:12px; font-weight:550; opacity:0; pointer-events:none; transition:opacity .2s; max-width:90vw; text-align:center; }
+  .toast.show { opacity:1; }
+  .particle { position:absolute; z-index:5; width:8px; height:8px; background:radial-gradient(circle at 30% 25%,#fff 0%,#F2D7D6 45%,#E9B8B7 100%); border:1px solid rgba(255,255,255,.8); border-radius:50%; box-shadow:0 2px 5px rgba(80,90,80,.12); pointer-events:none; animation:burst .58s cubic-bezier(.2,.75,.25,1) forwards; }
+  @keyframes burst { to { transform:translate(var(--x),var(--y)) rotate(220deg) scale(.1); opacity:0; } }
+  @media (min-width:600px) {
+    body { background:#ECEDE7; }
+    .app { margin:20px auto; min-height:calc(100svh - 40px); border-radius:32px; box-shadow:0 15px 55px rgba(52,62,53,.07); padding-left:28px; padding-right:28px; }
+    .stage { min-height:500px; }
+    .bubble .bubble-text { font-size:12px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="topline">
+    <span class="label">LET IT FLOAT</span>
+    <span class="label">YOUR FEELING SPACE</span>
+    <span id="dateLabel">10/22</span>
+  </header>
+  <h1>좋은 순간만<br>간직하세요.</h1>
+  <p class="sub">마음은 가볍게, 기억은 다정하게.</p>
+
+  <section class="stage" id="stage" aria-label="이번 달의 감정 정원">
+    <div class="stage-note">THIS MONTH, IN FEELINGS</div>
+  </section>
+
+  <section class="controls">
+    <button class="action good-btn" id="addGood">♡  가져가기</button>
+    <button class="action bad-btn" id="addBad">○  놓아주기</button>
+  </section>
+  <footer class="bottom">
+    <div><div class="month" id="monthLabel">OCTOBER '26</div><div id="countLabel">0 MEMORIES KEPT</div></div>
+    <button class="archive-btn" id="archiveBtn">기억 보관함  ↗</button>
+  </footer>
+</main>
+
+<div class="modal-backdrop" id="entryModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <h2 id="modalTitle">KEEP A GOOD THING</h2>
+    <p id="modalDesc">오늘 간직하고 싶은 순간을 적어 주세요.</p>
+    <textarea id="entryText" maxlength="180" placeholder="예: 집에 오는 길의 노을이 예뻤어요."></textarea>
+    <div class="modal-actions"><button class="cancel" id="cancelEntry">취소</button><button class="save" id="saveEntry">기록 남기기 ↗</button></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="archiveModal" role="dialog" aria-modal="true" aria-labelledby="archiveTitle">
+  <div class="modal">
+    <h2 id="archiveTitle">기억 보관함</h2>
+    <p>가져온 기억은 달이 바뀌어도 이곳에서 다시 볼 수 있어요.</p>
+    <div class="archive-list" id="archiveList"></div>
+    <div class="modal-actions"><button class="cancel" id="closeArchive">닫기</button><button class="save" id="exportBtn">기록 백업 ↗</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const KEY = "let-it-float-v1";
+  const stage = document.getElementById("stage");
+  const entryModal = document.getElementById("entryModal");
+  const archiveModal = document.getElementById("archiveModal");
+  const entryText = document.getElementById("entryText");
+  const toast = document.getElementById("toast");
+  let entryType = "good";
+  let memories = load();
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
+    catch { return []; }
+  }
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify(memories)); }
+    catch { showToast("저장 공간을 확인해 주세요."); }
+  }
+  function monthKey(date) {
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+  }
+  function monthName(date) {
+    const d = new Date(date);
+    return d.toLocaleDateString("en-US", {month:"long", year:"2-digit"}).toUpperCase().replace(" ", " '");
+  }
+  function updateHeader() {
+    const now = new Date();
+    document.getElementById("dateLabel").textContent = `${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")}`;
+    document.getElementById("monthLabel").textContent = monthName(now);
+    const count = memories.filter(m => m.type === "good" && !m.popped).length;
+    document.getElementById("countLabel").textContent = `${count} MEMORIES KEPT`;
+  }
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2100);
+  }
+  function openEntry(type) {
+    entryType = type;
+    document.getElementById("modalTitle").textContent = type === "good" ? "가져가기" : "놓아주기";
+    document.getElementById("modalDesc").textContent = type === "good"
+      ? "오늘 간직하고 싶은 순간을 적어 주세요."
+      : "놓아주고 싶은 마음을 적어 주세요. 기록한 뒤 원을 직접 눌러 놓아줄 수 있어요.";
+    entryText.value = "";
+    entryText.placeholder = type === "good" ? "예: 집에 오는 길의 노을이 예뻤어요." : "예: 오늘 들은 말이 계속 마음에 걸렸어요.";
+    entryModal.classList.add("open");
+    setTimeout(() => entryText.focus(), 80);
+  }
+  function closeEntry() { entryModal.classList.remove("open"); }
+  function addMemory() {
+    const text = entryText.value.trim();
+    if (!text) { showToast("한 문장만 적어 주세요."); return; }
+    const now = new Date().toISOString();
+    const memory = {
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      text, type:entryType, createdAt:now, popped:false,
+      // Normalized position is saved so each memory stays in place after reload.
+      x: 8 + Math.random() * 66,
+      y: 16 + Math.random() * 56,
+      size: Math.max(70, Math.min(98, 62 + text.length * 1.05))
+    };
+    memories.push(memory);
+    persist();
+    closeEntry();
+    render();
+    if (memory.type === "bad") {
+      showToast("놓아줄 마음을 남겼어요. 원을 눌러 놓아주세요.");
+    } else {
+      showToast("좋은 기억을 간직했어요.");
+    }
+  }
+  function popMemory(memory, el) {
+    const rect = el.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const x0 = rect.left - stageRect.left + rect.width/2;
+    const y0 = rect.top - stageRect.top + rect.height/2;
+    for (let i=0;i<10;i++) {
+      const p = document.createElement("i");
+      p.className = "particle";
+      p.style.left = `${x0}px`; p.style.top = `${y0}px`;
+      p.style.setProperty("--x", `${(Math.random()-.5)*150}px`);
+      p.style.setProperty("--y", `${(Math.random()-.5)*130}px`);
+      stage.appendChild(p);
+      setTimeout(() => p.remove(), 650);
+    }
+    el.animate([{transform:"scale(1)",opacity:1},{transform:"scale(1.35)",opacity:.8},{transform:"scale(.05)",opacity:0}], {duration:260,easing:"ease-out"});
+    setTimeout(() => {
+      memories = memories.filter(m => m.id !== memory.id);
+      persist(); render();
+    }, 260);
+  }
+  function render() {
+    stage.querySelectorAll(".bubble").forEach(el => el.remove());
+    const currentMonth = monthKey(new Date());
+    const visible = memories.filter(m => m.type === "good" && !m.popped && monthKey(m.createdAt) === currentMonth);
+    const bad = memories.filter(m => m.type === "bad" && !m.popped && monthKey(m.createdAt) === currentMonth);
+    [...visible, ...bad].forEach((m, index) => {
+      const el = document.createElement("button");
+      el.className = `bubble ${m.type}`;
+      el.dataset.id = m.id;
+      const size = m.size || Math.max(70, Math.min(98, 62 + m.text.length * 1.05));
+      // Older entries get a stable fallback position once, then persist it.
+      if (typeof m.x !== "number" || typeof m.y !== "number") {
+        m.x = 8 + Math.random() * 66;
+        m.y = 16 + Math.random() * 56;
+        m.size = size;
+        persist();
+      }
+      el.style.width = `${size}px`; el.style.height = `${size}px`;
+      el.style.left = `${m.x}%`;
+      el.style.top = `${m.y}%`;
+      el.style.setProperty("--duration", `${3.6 + Math.random()*3.5}s`);
+      el.style.setProperty("--drift", `${Math.round((Math.random()-.5)*30)}px`);
+      el.style.animationDelay = `${Math.random()*-4}s`;
+      el.setAttribute("aria-label", m.type === "good" ? `가져온 기억: ${m.text}` : `놓아줄 기억: ${m.text}. 눌러서 놓아주기`);
+      const span = document.createElement("span");
+      span.className = "bubble-text";
+      span.textContent = m.text;
+      el.appendChild(span);
+      el.addEventListener("click", () => {
+        if (m.type === "bad") {
+          popMemory(m, el);
+          showToast("마음을 놓아주었어요.");
+        } else {
+          showToast(`${new Date(m.createdAt).getMonth()+1}/${new Date(m.createdAt).getDate()} · ${m.text}`);
+        }
+      });
+      stage.appendChild(el);
+    });
+    updateHeader();
+  }
+  function openArchive() {
+    const list = document.getElementById("archiveList");
+    list.innerHTML = "";
+    const good = memories.filter(m => m.type === "good" && !m.popped).sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+    if (!good.length) {
+      list.innerHTML = '<div class="empty">아직 가져온 기억이 없어요. 오늘의 작은 순간부터 간직해 보세요.</div>';
+    } else {
+      const groups = {};
+      good.forEach(m => { (groups[monthKey(m.createdAt)] ||= []).push(m); });
+      Object.keys(groups).sort().reverse().forEach(month => {
+        const heading = document.createElement("div");
+        heading.style.cssText = "width:100%;font-size:12px;font-weight:900;margin-top:8px";
+        heading.textContent = month;
+        list.appendChild(heading);
+        groups[month].forEach(m => {
+          const chip = document.createElement("div");
+          chip.className = "archive-chip";
+          chip.textContent = m.text;
+          const small = document.createElement("small");
+          small.textContent = new Date(m.createdAt).toLocaleDateString("ko-KR");
+          chip.appendChild(small); list.appendChild(chip);
+        });
+      });
+    }
+    archiveModal.classList.add("open");
+  }
+  document.getElementById("addGood").addEventListener("click", () => openEntry("good"));
+  document.getElementById("addBad").addEventListener("click", () => openEntry("bad"));
+  document.getElementById("cancelEntry").addEventListener("click", closeEntry);
+  document.getElementById("saveEntry").addEventListener("click", addMemory);
+  entryModal.addEventListener("click", e => { if (e.target === entryModal) closeEntry(); });
+  document.getElementById("archiveBtn").addEventListener("click", openArchive);
+  document.getElementById("closeArchive").addEventListener("click", () => archiveModal.classList.remove("open"));
+  archiveModal.addEventListener("click", e => { if (e.target === archiveModal) archiveModal.classList.remove("open"); });
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(memories, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download="let-it-float-memories.json"; a.click();
+    URL.revokeObjectURL(url);
+    showToast("기록 백업 파일을 만들었어요.");
+  });
+  entryText.addEventListener("keydown", e => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") addMemory(); });
+  render();
+})();
+</script>
+</body>
+</html>
